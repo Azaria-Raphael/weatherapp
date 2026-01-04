@@ -16,13 +16,14 @@ class WeatherScreen extends StatefulWidget {
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
+  late Future<Map<String, dynamic>> weather;
   Future<Map<String, dynamic>> getCurrentWeather() async {
     try {
       setState(() {});
-      String cityName = 'London';
+      String cityName = 'Dar es Salaam';
       final result = await http.get(
         Uri.parse(
-          "https://api.openweathermap.org/data/2.5/forecast?q=$cityName,uk&APPID=$openWeatherAPIkey",
+          "https://api.openweathermap.org/data/2.5/forecast?q=$cityName,TZ&units=metric&appid=$openWeatherAPIkey",
         ),
       );
       final data = jsonDecode(result.body);
@@ -36,18 +37,33 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    weather = getCurrentWeather();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Weather App",
+          "Dar es Salaam",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.refresh))],
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                weather = getCurrentWeather();
+              });
+            },
+            icon: Icon(Icons.refresh),
+          ),
+        ],
       ),
       body: FutureBuilder(
-        future: getCurrentWeather(),
+        future: weather,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: const CircularProgressIndicator.adaptive());
@@ -57,13 +73,49 @@ class _WeatherScreenState extends State<WeatherScreen> {
           }
 
           final data = snapshot.data!;
+          IconData getWeatherIcon(String main) {
+            switch (main) {
+              case 'Clear':
+                return Icons.wb_sunny;
+
+              case 'Clouds':
+                return Icons.cloud;
+
+              case 'Rain':
+              case 'Drizzle':
+                return Icons.grain;
+
+              case 'Thunderstorm':
+                return Icons.flash_on;
+
+              case 'Snow':
+                return Icons.ac_unit;
+
+              case 'Mist':
+              case 'Smoke':
+              case 'Haze':
+              case 'Dust':
+              case 'Fog':
+              case 'Sand':
+              case 'Ash':
+                return Icons.blur_on;
+
+              case 'Squall':
+              case 'Tornado':
+                return Icons.cyclone;
+
+              default:
+                return Icons.help_outline;
+            }
+          }
+
           // data from API on the first card
           final currentTemp = data['list'][0]['main']['temp'];
 
-          // I like description more than main because it's more detailed hence currentSky is taking description from the API
-
           // final currentSky = data['list'][0]['weather'][0]['main'];
-          final currentSky = data['list'][0]['weather'][0]['description'];
+          final currentSkyMain = data['list'][0]['weather'][0]['main'];
+          final currentSkyDescription =
+              data['list'][0]['weather'][0]['description'];
 
           // additional information
           final currentPressure = data['list'][0]['main']['pressure'];
@@ -93,7 +145,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             children: [
                               Text(
                                 // '300.67 °K', this is placeholder vaule
-                                '$currentTemp K',
+                                '$currentTemp °C',
                                 style: TextStyle(
                                   fontSize: 32,
                                   fontWeight: FontWeight.bold,
@@ -101,13 +153,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
                               ),
                               const SizedBox(height: 16),
                               Icon(
-                                currentSky == 'Clouds' || currentSky == 'Rain'
-                                    ? Icons.cloud
-                                    : Icons.sunny,
+                                getWeatherIcon(currentSkyMain),
+                                size: 48,
+                                color: Colors.blue,
                               ),
+
                               const SizedBox(height: 16),
                               Text(
-                                "$currentSky",
+                                "$currentSkyDescription",
                                 style: TextStyle(fontSize: 25),
                               ),
                             ],
@@ -152,7 +205,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   height: 120,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: 25,
+                    itemCount: 39,
                     itemBuilder: (context, index) {
                       final hourlyforecast = data['list'][index + 1];
                       final hourlySkyicon =
@@ -163,10 +216,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       return HourlyForecastItem(
                         time: DateFormat.jm().format(time),
                         temperature: hourlyforecast['main']['temp'].toString(),
-                        icon:
-                            hourlySkyicon == "Clouds" || hourlySkyicon == "Rain"
-                            ? Icons.cloud
-                            : Icons.sunny,
+                        // icon:
+                        //     hourlySkyicon == "Clouds" || hourlySkyicon == "Rain"
+                        //     ? Icons.cloud
+                        //     : Icons.sunny,
+                        icon: getWeatherIcon(hourlySkyicon),
                       );
                     },
                   ),
