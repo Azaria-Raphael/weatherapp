@@ -59,7 +59,15 @@ class _WeatherScreenState extends State<WeatherScreen> {
           // data from API on the first card
           final currentTemp = data['list'][0]['main']['temp'];
 
-          final currentSky = data['list'][0]['weather'][0]['main'];
+          // I like description more than main because it's more detailed hence currentSky is taking description from the API
+
+          // final currentSky = data['list'][0]['weather'][0]['main'];
+          final currentSky = data['list'][0]['weather'][0]['description'];
+
+          // additional information
+          final currentPressure = data['list'][0]['main']['pressure'];
+          final currentHumidity = data['list'][0]['main']['humidity'];
+          final currentWindSpeed = data['list'][0]['wind']['speed'];
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
@@ -83,7 +91,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           child: Column(
                             children: [
                               Text(
-                                // '300.67 °K',
+                                // '300.67 °K', this is placeholder vaule
                                 '$currentTemp K',
                                 style: TextStyle(
                                   fontSize: 32,
@@ -158,17 +166,17 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     AdditionalInfoItem(
                       icon: Icons.water_drop,
                       label: "Humidity",
-                      value: "92%",
+                      value: currentHumidity.toString(),
                     ),
                     AdditionalInfoItem(
                       icon: Icons.speed,
                       label: "Wind Speed",
-                      value: "12 km/h",
+                      value: currentWindSpeed.toString(),
                     ),
                     AdditionalInfoItem(
                       icon: Icons.stacked_line_chart,
                       label: "Pressure",
-                      value: "1008",
+                      value: currentPressure.toString(),
                     ),
                   ],
                 ),
