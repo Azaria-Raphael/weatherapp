@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:weatherapp/additional_info_item.dart';
 import 'package:weatherapp/hourly_forecast_item.dart';
 import 'package:http/http.dart' as http;
@@ -118,40 +119,56 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 ),
                 const SizedBox(height: 25),
                 Text(
-                  "Weather Forecast",
+                  "Hourly Forecast",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      HourlyForecastItem(
-                        time: "00:00",
-                        icon: Icons.cloud,
-                        temperature: "320.11",
-                      ),
-                      HourlyForecastItem(
-                        time: "01:00",
-                        icon: Icons.sunny,
-                        temperature: "322.52",
-                      ),
-                      HourlyForecastItem(
-                        time: "02:00",
-                        icon: Icons.cloud,
-                        temperature: "302.33",
-                      ),
-                      HourlyForecastItem(
-                        time: "03:00",
-                        icon: Icons.cloud,
-                        temperature: "323.44",
-                      ),
-                      HourlyForecastItem(
-                        time: "04:00",
-                        icon: Icons.sunny,
-                        temperature: "324.55",
-                      ),
-                    ],
+
+                // the hourly forecast section is commented out for now
+                //because it is building 40 components which will slow down
+                //the app due to perfomance issues
+
+                // SingleChildScrollView(
+                //   scrollDirection: Axis.horizontal,
+                //   child: Row(
+                //     children: [
+                //       for (int i = 0; i < 39; i++)
+                //         HourlyForecastItem(
+                //           time: data['list'][i + 1]['dt'].toString(),
+                //           icon:
+                // data['list'][i + 1]['weather'][0]['main'] ==
+                //         "Clouds" ||
+                //     data['list'][i + 1]['weather'][0]['main'] ==
+                //         "Rain"
+                // ? Icons.cloud
+                // : Icons.sunny,
+                //           temperature: data['list'][i + 1]['main']['temp']
+                //               .toString(),
+                //         ),
+                //     ],
+                //   ),
+                // ),
+                SizedBox(
+                  height: 120,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 25,
+                    itemBuilder: (context, index) {
+                      final hourlyforecast = data['list'][index + 1];
+                      final hourlySkyicon =
+                          data['list'][index + 1]['weather'][0]['main'];
+                      final time = DateTime.parse(
+                        hourlyforecast['dt_txt'].toString(),
+                      );
+                      return HourlyForecastItem(
+                        time: DateFormat.jm().format(time),
+                        temperature: hourlyforecast['main']['temp'].toString(),
+                        icon:
+                            hourlySkyicon == "Clouds" || hourlySkyicon == "Rain"
+                            ? Icons.cloud
+                            : Icons.sunny,
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 20),
