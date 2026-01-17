@@ -18,22 +18,21 @@ class WeatherScreen extends StatefulWidget {
 class _WeatherScreenState extends State<WeatherScreen> {
   late Future<Map<String, dynamic>> weather;
   Future<Map<String, dynamic>> getCurrentWeather() async {
-    try {
-      setState(() {});
-      String cityName = 'Dar es Salaam';
-      final result = await http.get(
-        Uri.parse(
-          "https://api.openweathermap.org/data/2.5/forecast?q=$cityName,TZ&units=metric&appid=$openWeatherAPIkey",
-        ),
-      );
-      final data = jsonDecode(result.body);
-      if (data['cod'] != '200') {
-        throw 'An expected Error Occured';
-      }
-      return data;
-    } catch (e) {
-      throw e.toString();
+    String cityName = 'Dar es Salaam';
+
+    final result = await http.get(
+      Uri.parse(
+        "https://api.openweathermap.org/data/2.5/forecast?q=$cityName,TZ&units=metric&appid=$openWeatherAPIkey",
+      ),
+    );
+
+    final data = jsonDecode(result.body);
+
+    if (data['cod'] != '200') {
+      throw 'Unexpected error occurred';
     }
+
+    return data;
   }
 
   @override
